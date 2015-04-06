@@ -8,7 +8,9 @@ import android.content.Context;
 public abstract class AbstractSocialNetwork implements IHasError, IUpdateUsername {
 
     private Context context;
+
     private OnPublicProfileListener onPublicProfileListener;
+
     private OnErrorListener onErrorListener;
 
     public AbstractSocialNetwork(Context context) {

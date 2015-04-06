@@ -15,8 +15,11 @@ import java.util.List;
 public class SocialNetworks implements IHasError, IUpdateUsername, AbstractSocialNetwork.OnPublicProfileListener, AbstractSocialNetwork.OnErrorListener {
 
     private Context context;
+
     private Callback callback;
+
     private List<AbstractSocialNetwork> networks = new LinkedList<>();
+
     private List<User> users = new LinkedList<>();
 
     public SocialNetworks(Context context, Callback callback) {

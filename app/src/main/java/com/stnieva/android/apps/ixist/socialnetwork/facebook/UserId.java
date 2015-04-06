@@ -20,7 +20,7 @@ import java.util.Arrays;
  */
 public class UserId extends AsyncTask<String, Void, String> {
 
-        private OnFinishListener onFinishListener;;
+    private OnFinishListener onFinishListener;
 
     public UserId(OnFinishListener l) {
         this.onFinishListener = l;
@@ -59,7 +59,7 @@ public class UserId extends AsyncTask<String, Void, String> {
         onFinishListener.onFinish(userId);
     }
 
-public interface OnFinishListener  {
+    public interface OnFinishListener  {
         public void onFinish(String userId);
     }
 }
