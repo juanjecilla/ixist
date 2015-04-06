@@ -30,7 +30,7 @@ public class Facebook extends AbstractSocialNetwork implements UserId.OnFinishLi
     }
 
     @Override
-    public boolean hasError(int keyCode, String regularExpression) {
+    public boolean hasError(int keyCode) {
         return Pattern.matches("/^[[:alnum:]\\x2E]+$/", Integer.toHexString(keyCode));
     }
 

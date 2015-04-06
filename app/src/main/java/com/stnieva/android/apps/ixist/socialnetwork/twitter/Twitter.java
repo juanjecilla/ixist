@@ -35,7 +35,7 @@ public class Twitter extends AbstractSocialNetwork {
     }
 
     @Override
-    public boolean hasError(int keyCode, String regularExpression) {
+    public boolean hasError(int keyCode) {
         return Pattern.matches("/^[[:alnum:]\\x5F]+$/", Integer.toHexString(keyCode));
     }
 
