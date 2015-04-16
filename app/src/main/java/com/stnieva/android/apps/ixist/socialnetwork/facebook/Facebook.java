@@ -1,6 +1,8 @@
 package com.stnieva.android.apps.ixist.socialnetwork.facebook;
 
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.HttpMethod;
@@ -25,6 +27,8 @@ import static com.stnieva.android.apps.ixist.socialnetwork.facebook.Constants.AC
  */
 public class Facebook extends AbstractSocialNetwork implements UserId.OnFinishListener {
 
+    String username;
+
     public Facebook(Context context) {
         super(context);
     }
@@ -36,6 +40,8 @@ public class Facebook extends AbstractSocialNetwork implements UserId.OnFinishLi
 
     @Override
     public void updateUsername(String username) {
+        this.username = username;
+
         UserId id = new UserId(this);
         id.execute(username);
     }
@@ -60,8 +66,6 @@ public class Facebook extends AbstractSocialNetwork implements UserId.OnFinishLi
                         GraphObject graphObject = response.getGraphObject();
 
                         if (graphObject != null) {
-                            String username = (String) graphObject.getProperty("username");
-
                             String name = (String) graphObject.getProperty("name");
 
                             getOnPublicProfileListener().onPublicProfile(new User(userId, username, name, Type.FACEBOOK));

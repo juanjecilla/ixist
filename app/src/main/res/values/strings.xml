@@ -4,4 +4,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="facebook_app_id"></string>
+    <string name="action_github">GitHub</string>
+    <string name="username">Username</string>
 </resources>
