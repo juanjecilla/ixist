@@ -6,4 +6,5 @@
     <string name="facebook_app_id"></string>
     <string name="action_github">GitHub</string>
     <string name="username">Username</string>
+    <string name="not_found">No está conectado a Internet</string>
 </resources>

@@ -1,6 +1,5 @@
-package com.stnieva.android.apps.ixist.widget;
+package com.stnieva.android.apps.ixist.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.stnieva.android.apps.ixist.R;
-import com.stnieva.android.apps.ixist.socialnetwork.User;
+import com.stnieva.android.apps.ixist.model.User;
 
 import java.util.List;
 
@@ -59,6 +58,10 @@ public class UsersAdapter extends ArrayAdapter<User> {
 
         TextView caption = (TextView) user.findViewById(R.id.caption);
         caption.setText(users.get(position).getUsername());
+
+        View line = user.findViewById(R.id.line);
+        int visibility = users.get(position).getType() == users.get(users.size() - 1).getType() ? View.GONE : View.VISIBLE;
+        line.setVisibility(visibility);
 
         return user;
     }

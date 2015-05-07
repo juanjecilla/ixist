@@ -1,4 +1,4 @@
-package com.stnieva.android.apps.ixist.socialnetwork;
+package com.stnieva.android.apps.ixist.model;
 
 /**
  * Created by stnieva on 6/4/15.

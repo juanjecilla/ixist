@@ -7,13 +7,13 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:id="@+id/wrap"
+        android:id="@+id/wrapUsername"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="25"
         android:background="@color/orange"
+        android:elevation="4dp"
         android:gravity="center"
-        android:minHeight="96dp"
         android:weightSum="100">
 
         <EditText
@@ -30,15 +30,25 @@
             android:textColorHint="@color/gallery" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/list"
+    <view
+        android:id="@+id/progressBar"
+        class="com.stnieva.android.apps.ixist.view.ProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/wrapList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="75"
-        android:dividerHeight="4dp"
-        android:paddingBottom="@dimen/app_vertical_margin"
-        android:paddingLeft="@dimen/app_horizontal_margin"
-        android:paddingRight="@dimen/app_horizontal_margin"
-        android:paddingTop="@dimen/app_vertical_margin" />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
 </LinearLayout>

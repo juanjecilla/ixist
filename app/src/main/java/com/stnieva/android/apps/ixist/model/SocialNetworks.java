@@ -1,9 +1,9 @@
-package com.stnieva.android.apps.ixist.socialnetwork;
+package com.stnieva.android.apps.ixist.model;
 
 import android.content.Context;
 
-import com.stnieva.android.apps.ixist.socialnetwork.facebook.Facebook;
-import com.stnieva.android.apps.ixist.socialnetwork.twitter.Twitter;
+import com.stnieva.android.apps.ixist.model.facebook.Facebook;
+import com.stnieva.android.apps.ixist.model.twitter.Twitter;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,29 +12,29 @@ import java.util.List;
 /**
  * Created by stnieva on 6/4/15.
  */
-public class SocialNetworks implements IHasError, IUpdateUsername, AbstractSocialNetwork.OnPublicProfileListener, AbstractSocialNetwork.OnErrorListener {
+public class SocialNetworks implements IHasError, IUpdateUsername, CallbackUser {
 
     private Context context;
 
-    private Callback callback;
+    private CallbackUsers callback;
 
     private List<AbstractSocialNetwork> networks = new LinkedList<>();
 
     private List<User> users = new LinkedList<>();
 
-    public SocialNetworks(Context context, Callback callback) {
+    public SocialNetworks(Context context, CallbackUsers callback) {
         this.context = context;
         this.callback = callback;
 
-        Facebook facebook = new Facebook(context);
-        facebook.setOnErrorListener(this);
-        facebook.setOnPublicProfileListener(this);
+        Facebook facebook = new Facebook(context, this);
         networks.add(facebook);
 
-        Twitter twitter = new Twitter(context);
-        twitter.setOnErrorListener(this);
-        twitter.setOnPublicProfileListener(this);
+        Twitter twitter = new Twitter(context, this);
         networks.add(twitter);
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     @Override
@@ -60,12 +60,7 @@ public class SocialNetworks implements IHasError, IUpdateUsername, AbstractSocia
     }
 
     @Override
-    public void onError(SocialNetworkException exception) {
-        callback.failure(exception);
-    }
-
-    @Override
-    public void onPublicProfile(User user) {
+    public void onSuccess(User user) {
         users.add(user);
 
         if (users.size() == networks.size()) {
@@ -73,9 +68,8 @@ public class SocialNetworks implements IHasError, IUpdateUsername, AbstractSocia
         }
     }
 
-    public interface Callback {
-        void success(List<User> users);
-
-        void failure(SocialNetworkException e);
+    @Override
+    public void onFailure(SocialNetworkException e) {
+        callback.failure(e);
     }
 }

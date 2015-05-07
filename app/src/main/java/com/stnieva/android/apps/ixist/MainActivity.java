@@ -6,47 +6,74 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.stnieva.android.apps.ixist.socialnetwork.AbstractSocialNetwork;
-import com.stnieva.android.apps.ixist.socialnetwork.SocialNetworkException;
-import com.stnieva.android.apps.ixist.socialnetwork.SocialNetworks;
-import com.stnieva.android.apps.ixist.socialnetwork.User;
-import com.stnieva.android.apps.ixist.socialnetwork.facebook.Facebook;
-import com.stnieva.android.apps.ixist.widget.UsersAdapter;
+import com.stnieva.android.apps.ixist.model.CallbackUsers;
+import com.stnieva.android.apps.ixist.model.SocialNetworkException;
+import com.stnieva.android.apps.ixist.model.SocialNetworks;
+import com.stnieva.android.apps.ixist.model.User;
+import com.stnieva.android.apps.ixist.view.ErrorDialog;
+import com.stnieva.android.apps.ixist.view.ProgressBar;
+import com.stnieva.android.apps.ixist.view.UsersAdapter;
+import com.stnieva.android.apps.ixist.view.WarningDialog;
 
 import java.util.List;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 
-public class MainActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
+public class MainActivity extends ActionBarActivity {
+
+    private LinearLayout wrapUsername;
+
+    private EditText username;
+
+    private LinearLayout wrapList;
 
     private ListView list;
+
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final LinearLayout wrap = (LinearLayout) findViewById(R.id.wrap);
-        wrap.post(new Runnable() {
+        wrapUsername = (LinearLayout) findViewById(R.id.wrapUsername);
+        wrapUsername.post(new Runnable() {
             @Override
             public void run() {
-                LayoutParams params = new LayoutParams(MATCH_PARENT, wrap.getHeight());
-                wrap.setLayoutParams(params);
+                LayoutParams params = new LayoutParams(MATCH_PARENT, wrapUsername.getHeight());
+                wrapUsername.setLayoutParams(params);
             }
         });
+
+        username = (EditText) findViewById(R.id.username);
+        username.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    update();
+                }
+
+                return handled;
+            }
+        });
+
+        wrapList = (LinearLayout) findViewById(R.id.wrapList);
 
         list = (ListView) findViewById(R.id.list);
         list.post(new Runnable() {
@@ -57,8 +84,7 @@ public class MainActivity extends ActionBarActivity implements TextView.OnEditor
             }
         });
 
-        EditText username = (EditText) findViewById(R.id.username);
-        username.setOnEditorActionListener(this);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
     }
 
 
@@ -85,43 +111,82 @@ public class MainActivity extends ActionBarActivity implements TextView.OnEditor
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        boolean handled = false;
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
 
-            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    private void tryAgain() {
+        FragmentManager fm = getSupportFragmentManager();
 
-            if (isConnected) {
-                final Context context = getApplicationContext();
+        final ErrorDialog dialog = new ErrorDialog();
 
-                SocialNetworks networks = new SocialNetworks(context, new SocialNetworks.Callback() {
-                    @Override
-                    public void success(List<User> users) {
-                        UsersAdapter adapter = new UsersAdapter(context, users);
-                        list.setAdapter(adapter);
-                    }
+        dialog.setContent("Problem with network connection. Please try again.");
 
-                    @Override
-                    public void failure(SocialNetworkException e) {
-
-                    }
-                });
-
-                String username = v.getText().toString();
-
-                if (!username.isEmpty()) {
-                    networks.updateUsername(username);
-                }
+        dialog.setCancelButton(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
             }
+        });
 
-//            handled = true;
+        dialog.setTryAgainButton(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                update();
+            }
+        });
+
+        dialog.show(fm, "error");
+    }
+
+    private void warning() {
+        FragmentManager fm = getSupportFragmentManager();
+
+        final WarningDialog dialog = new WarningDialog();
+
+        dialog.setContent("Username is required and can't be empty.");
+
+        dialog.setOkButton(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show(fm, "warning");
+    }
+
+    private void update() {
+        if (username.getText().toString().isEmpty()) {
+            warning();
+        } else if (isConnected()) {
+            progressBar.start();
+
+            final Context context = getApplicationContext();
+
+            SocialNetworks networks = new SocialNetworks(context, new CallbackUsers() {
+                @Override
+                public void success(List<User> users) {
+                    UsersAdapter adapter = new UsersAdapter(context, users);
+                    list.setAdapter(adapter);
+
+                    progressBar.stop();
+                }
+
+                @Override
+                public void failure(SocialNetworkException e) {
+
+                }
+            });
+
+            networks.updateUsername(username.getText().toString());
+        } else {
+            tryAgain();
         }
-
-        return handled;
     }
 }
